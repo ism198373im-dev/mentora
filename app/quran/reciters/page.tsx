@@ -1,29 +1,33 @@
+"use client"
+
+import { useState } from "react"
+
 const reciters = [
-  "مشاري العفاسي",
-  "عبدالباسط عبدالصمد",
-  "السديس",
-  "المنشاوي",
+  { name: "Alafasy", url: "https://server1.com/alafasy/" },
+  { name: "Sudais", url: "https://server1.com/sudais/" },
+  { name: "Shuraim", url: "https://server1.com/shuraim/" },
 ]
 
 export default function RecitersPage() {
-  return (
-    <div style={{ padding: "20px" }}>
-      <h1>🎧 القراء</h1>
+  const [selected, setSelected] = useState(reciters[0])
 
-      <div style={{ marginTop: "20px" }}>
-        {reciters.map((r) => (
-          <div key={r} style={card}>
-            🎤 {r}
-          </div>
+  return (
+    <div style={{ padding: 20 }}>
+      <h1>🎧 اختيار القارئ</h1>
+
+      <select
+        onChange={(e) =>
+          setSelected(reciters[Number(e.target.value)])
+        }
+      >
+        {reciters.map((r, i) => (
+          <option key={i} value={i}>
+            {r.name}
+          </option>
         ))}
-      </div>
+      </select>
+
+      <p>القارئ الحالي: {selected.name}</p>
     </div>
   )
-}
-
-const card = {
-  padding: "10px",
-  border: "1px solid #ddd",
-  marginBottom: "10px",
-  borderRadius: "8px",
 }
