@@ -108,10 +108,64 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
   type __Unused = __Check
 }
 
+// Validate ../../../app/quran/memorization/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/quran/memorization">> = Specific
+  const handler = {} as typeof import("../../../app/quran/memorization/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../app/quran/mushaf/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/quran/mushaf">> = Specific
+  const handler = {} as typeof import("../../../app/quran/mushaf/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../../app/quran/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/quran">> = Specific
   const handler = {} as typeof import("../../../app/quran/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../app/quran/read/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/quran/read">> = Specific
+  const handler = {} as typeof import("../../../app/quran/read/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../app/quran/reciters/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/quran/reciters">> = Specific
+  const handler = {} as typeof import("../../../app/quran/reciters/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../app/quran/surahs/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/quran/surahs">> = Specific
+  const handler = {} as typeof import("../../../app/quran/surahs/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../app/quran/tajweed/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/quran/tajweed">> = Specific
+  const handler = {} as typeof import("../../../app/quran/tajweed/page.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check
