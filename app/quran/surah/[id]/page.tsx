@@ -15,21 +15,13 @@ export default function SurahPage({ params }: any) {
 
   return (
     <div style={{ padding: "20px", lineHeight: "2" }}>
-      <h1>
-        📖 {surah.name} - {surah.englishName}
-      </h1>
+      <h1>📖 {surah.name}</h1>
 
-      <p>عدد الآيات: {surah.numberOfAyahs}</p>
-
-      <hr />
-
-      <div>
-        {surah.ayahs.map((a: any) => (
-          <p key={a.number} style={{ marginBottom: "15px" }}>
-            <b>{a.numberInSurah}.</b> {a.text}
-          </p>
-        ))}
-      </div>
+      {surah.ayahs.map((a: any) => (
+        <p key={a.number}>
+          <b>{a.numberInSurah}.</b> {a.text}
+        </p>
+      ))}
     </div>
   )
 }
