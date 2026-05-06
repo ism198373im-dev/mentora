@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import { NextResponse } from "next/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2024-06-20",
+  apiVersion: "2026-04-22.dahlia",
 });
 
 export async function POST(req: Request) {
@@ -18,11 +18,8 @@ export async function POST(req: Request) {
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-
       payment_method_types: ["card"],
-
       customer_email: user.email,
-
       client_reference_id: user.uid,
 
       line_items: [
@@ -38,6 +35,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
+    console.log("Stripe error:", error);
+
     return NextResponse.json(
       { error: "Server error" },
       { status: 500 }
