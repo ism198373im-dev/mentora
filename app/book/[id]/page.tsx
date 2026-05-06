@@ -1,146 +1,77 @@
-"use client"
+"use client";
 
-import { useParams, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { db, auth } from "@/lib/firebase"
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-} from "firebase/firestore"
-
-type Teacher = {
-  name: string
-  subject: string
-  price?: number
-}
+import { useParams } from "next/navigation";
+import { tutors } from "@/data/tutors";
+import { auth, db } from "@/lib/firebase";
+import { addDoc, collection } from "firebase/firestore";
 
 export default function BookPage() {
-  const { id } = useParams()
-  const router = useRouter()
+  const { id } = useParams();
 
-  const [teacher, setTeacher] = useState<Teacher | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [done, setDone] = useState(false)
+  const tutor = tutors.find((t) => t.id === Number(id));
 
-  // 👨‍🏫 جلب بيانات المدرس
-  useEffect(() => {
-    const fetchTeacher = async () => {
-      const ref = doc(db, "teachers", id as string)
-      const snap = await getDoc(ref)
-
-      if (snap.exists()) {
-        setTeacher(snap.data() as Teacher)
-      }
-    }
-
-    fetchTeacher()
-  }, [id])
-
-  // 📅 الحجز
-  const handleBook = async () => {
-    const user = auth.currentUser
-
-    if (!user || !teacher) {
-      alert("لازم تسجيل دخول ❌")
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      // 1️⃣ إنشاء الحجز
-      const bookingRef = await addDoc(collection(db, "bookings"), {
-        teacherId: id,
-        teacherName: teacher.name,
-        teacherSubject: teacher.subject,
-        teacherPrice: teacher.price || 0,
-
-        userId: user.uid,
-        userName: user.email,
-
-        createdAt: new Date(),
-      })
-
-      // 2️⃣ إنشاء Room للشات
-      const roomRef = await addDoc(collection(db, "rooms"), {
-        teacherId: id,
-        studentId: user.uid,
-        bookingId: bookingRef.id,
-        createdAt: new Date(),
-      })
-
-      // 3️⃣ إشعار للمدرس
-      await addDoc(collection(db, "notifications"), {
-        userId: id,
-        text: "📅 لديك حجز جديد من طالب",
-        type: "booking",
-        read: false,
-        createdAt: new Date(),
-      })
-
-      setDone(true)
-
-      // 🚀 تحويل للشات بعد الحجز
-      setTimeout(() => {
-        router.push(`/chat/${roomRef.id}`)
-      }, 1000)
-
-    } catch (error) {
-      console.log(error)
-      alert("حصل خطأ أثناء الحجز")
-    }
-
-    setLoading(false)
+  if (!tutor) {
+    return (
+      <div className="p-10 text-center">
+        <h1 className="text-xl">Tutor not found</h1>
+      </div>
+    );
   }
 
+  const handleBooking = async () => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      alert("You must login first ❌");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "bookings"), {
+        tutorId: tutor.id,
+        name: tutor.name,
+        subject: tutor.subject,
+        price: tutor.price,
+        userId: user.uid,
+        userEmail: user.email,
+      });
+
+      alert("Booking saved to Firebase ✅");
+    } catch (error) {
+      console.log(error);
+      alert("Error saving booking ❌");
+    }
+  };
+
   return (
-    <div style={container}>
-      <h1>📅 تأكيد الحجز</h1>
+    <div className="p-10 text-center">
 
-      {/* 👨‍🏫 Teacher Card */}
-      {teacher ? (
-        <div style={card}>
-          <h2>👨‍🏫 {teacher.name}</h2>
-          <p>📘 {teacher.subject}</p>
-          <p>💰 {teacher.price} جنيه</p>
-        </div>
-      ) : (
-        <p>⏳ جاري تحميل بيانات المدرس...</p>
-      )}
+      <h1 className="text-4xl font-bold text-blue-600 mb-6">
+        📅 Book Session
+      </h1>
 
-      {/* Button */}
-      <button onClick={handleBook} disabled={loading} style={btn}>
-        {loading ? "جاري الحجز..." : "تأكيد الحجز"}
-      </button>
+      <div className="bg-white shadow p-6 rounded-xl max-w-md mx-auto">
 
-      {/* Success */}
-      {done && <p style={{ color: "green" }}>✅ تم الحجز بنجاح</p>}
+        <h2 className="text-2xl font-bold mb-2">
+          {tutor.name}
+        </h2>
+
+        <p className="text-gray-500 mb-1">
+          Subject: {tutor.subject}
+        </p>
+
+        <p className="text-gray-500 mb-4">
+          Price: {tutor.price} EGP / hour
+        </p>
+
+        <button
+          onClick={handleBooking}
+          className="bg-blue-600 text-white px-6 py-3 rounded w-full hover:bg-blue-700"
+        >
+          Confirm Booking
+        </button>
+
+      </div>
     </div>
-  )
-}
-
-/* 🎨 Styles */
-const container: React.CSSProperties = {
-  padding: 20,
-  background: "#f6f7fb",
-  minHeight: "100vh",
-}
-
-const card: React.CSSProperties = {
-  background: "white",
-  padding: 15,
-  borderRadius: 12,
-  marginBottom: 20,
-  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-}
-
-const btn: React.CSSProperties = {
-  padding: "12px 20px",
-  background: "#2563eb",
-  color: "white",
-  border: "none",
-  borderRadius: 8,
-  cursor: "pointer",
+  );
 }

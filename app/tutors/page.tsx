@@ -1,49 +1,52 @@
-"use client";
-
-import { useEffect, useState } from "react";
-
-type Tutor = {
-  id: string;
-  name: string;
-  subject: string;
-  price: number;
-};
+import Link from "next/link";
+import { tutors } from "@/data/tutors";
 
 export default function TutorsPage() {
-  const [tutors, setTutors] = useState<Tutor[]>([]);
-
-  useEffect(() => {
-    // بيانات تجريبية (بعد كده نربطها بـ Firebase)
-    const data: Tutor[] = [
-      { id: "1", name: "Ahmed Ali", subject: "Math", price: 100 },
-      { id: "2", name: "Sara Mohamed", subject: "English", price: 120 },
-      { id: "3", name: "Omar Hassan", subject: "Physics", price: 150 },
-    ];
-
-    setTutors(data);
-  }, []);
-
   return (
-    <div style={{ padding: 30 }}>
-      <h1 style={{ fontSize: 28, marginBottom: 20 }}>
-        👨‍🏫 Available Tutors
+    <div className="min-h-screen bg-gray-50 p-10">
+
+      <h1 className="text-4xl font-bold text-center text-blue-600 mb-10">
+        👨‍🏫 Our Tutors
       </h1>
 
-      <div style={{ display: "grid", gap: 15 }}>
+      <div className="grid md:grid-cols-3 gap-8">
+
         {tutors.map((tutor) => (
           <div
             key={tutor.id}
-            style={{
-              border: "1px solid #ddd",
-              padding: 15,
-              borderRadius: 10,
-            }}
+            className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition"
           >
-            <h2>{tutor.name}</h2>
-            <p>📚 Subject: {tutor.subject}</p>
-            <p>💰 Price: {tutor.price} EGP</p>
+
+            <div className="text-center mb-4">
+              <div className="w-16 h-16 mx-auto bg-blue-100 text-blue-600 flex items-center justify-center rounded-full text-xl font-bold">
+                {tutor.name[0]}
+              </div>
+
+              <h2 className="text-xl font-bold mt-3">
+                {tutor.name}
+              </h2>
+
+              <p className="text-gray-500">
+                {tutor.subject}
+              </p>
+            </div>
+
+            <div className="text-center mb-4">
+              <p className="text-gray-700 font-semibold">
+                {tutor.price} EGP / hour
+              </p>
+            </div>
+
+            <Link
+              href={`/book/${tutor.id}`}
+              className="block text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+            >
+              Book Now
+            </Link>
+
           </div>
         ))}
+
       </div>
     </div>
   );

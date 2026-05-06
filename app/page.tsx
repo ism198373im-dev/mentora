@@ -1,35 +1,39 @@
-import Link from "next/link"
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>🚀 Mentora</h1>
-      <p style={styles.subtitle}>منصة تعليم + قرآن + مدرسين</p>
+    <div className="min-h-screen bg-gray-50">
 
-      <div style={styles.grid}>
-        <Link style={styles.card} href="/teachers">👨‍🏫 المدرسين</Link>
-        <Link style={styles.card} href="/bookings">📅 الحجوزات</Link>
-        <Link style={styles.card} href="/dashboard">📊 الداشبورد</Link>
-        <Link style={styles.card} href="/quran">📖 القرآن الكريم</Link>
-        <Link style={styles.card} href="/admin">⚙️ الأدمن</Link>
+      <div className="flex flex-col items-center justify-center text-center px-6 py-28">
+
+        <h1 className="text-6xl font-bold text-blue-600 mb-6">
+          📖 Mentora
+        </h1>
+
+        <p className="text-gray-600 text-xl max-w-2xl mb-8">
+          Learn Quran, Math, and English with expert tutors. Book your session easily and start learning today 🚀
+        </p>
+
+        <div className="flex gap-4">
+
+          <Link
+            href="/tutors"
+            className="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700"
+          >
+            Find Tutors
+          </Link>
+
+          <Link
+            href="/bookings"
+            className="bg-white border px-8 py-3 rounded-xl hover:bg-gray-100"
+          >
+            My Bookings
+          </Link>
+
+        </div>
+
       </div>
-    </div>
-  )
-}
 
-const styles: any = {
-  container: { padding: "20px", textAlign: "center" },
-  title: { fontSize: "32px", marginBottom: "10px" },
-  subtitle: { color: "#666" },
-  grid: {
-    display: "grid",
-    gap: "10px",
-    marginTop: "20px",
-  },
-  card: {
-    padding: "12px",
-    border: "1px solid #ddd",
-    borderRadius: "10px",
-    textDecoration: "none",
-  },
+    </div>
+  );
 }

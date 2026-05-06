@@ -1,50 +1,25 @@
+import "./globals.css";
+import Navbar from "@/components/Navbar";
+
+export const metadata = {
+  title: "Mentora",
+  description: "Learning + Quran + Tutors Platform",
+};
+
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="ar">
-      <body
-        style={{
-          margin: 0,
-          fontFamily: "system-ui",
-          background: "#f6f7fb",
-        }}
-      >
-        {/* Navbar */}
-        <header style={nav}>
-          <div style={{ fontWeight: "bold" }}>🚀 Mentora</div>
+    <html lang="en">
+      <body>
 
-          <nav style={{ display: "flex", gap: 15 }}>
-            <a href="/" style={link}>Home</a>
-            <a href="/tutors" style={link}>Teachers</a>
-            <a href="/bookings" style={link}>Bookings</a>
-            <a href="/dashboard" style={link}>Dashboard</a>
-            <a href="/admin" style={link}>Admin</a>
-          </nav>
-        </header>
+        <Navbar />
 
-        {/* Page */}
-        <main style={{ padding: 20 }}>{children}</main>
+        {children}
+
       </body>
     </html>
-  )
-}
-
-const nav: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "15px 20px",
-  background: "white",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-  position: "sticky",
-  top: 0,
-}
-
-const link: React.CSSProperties = {
-  textDecoration: "none",
-  color: "#333",
-  fontSize: 14,
+  );
 }
