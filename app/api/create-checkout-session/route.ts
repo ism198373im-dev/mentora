@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 
+export const runtime = "nodejs";
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: "2026-04-22.dahlia",
 });
@@ -19,9 +21,7 @@ export async function POST(req: Request) {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
-
       customer_email: user.email,
-
       client_reference_id: user.uid,
 
       metadata: {
@@ -49,9 +49,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (error: any) {
+  } catch (error) {
     console.log("Stripe Error:", error);
-
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

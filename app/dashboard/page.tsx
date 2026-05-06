@@ -14,15 +14,15 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (currentUser) => {
-      if (!currentUser) {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
         router.push("/login");
         return;
       }
 
       const ADMIN_EMAIL = "ism198373.is@gmail.com";
 
-      if (currentUser.email !== ADMIN_EMAIL) {
+      if (user.email !== ADMIN_EMAIL) {
         alert("Access denied ❌");
         router.push("/");
         return;
@@ -33,20 +33,15 @@ export default function DashboardPage() {
           const usersSnap = await getDocs(collection(db, "users"));
           const bookingsSnap = await getDocs(collection(db, "bookings"));
 
-          const usersData = usersSnap.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
+          setUsers(
+            usersSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+          );
 
-          const bookingsData = bookingsSnap.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-
-          setUsers(usersData);
-          setBookings(bookingsData);
-        } catch (error) {
-          console.log("Error loading dashboard:", error);
+          setBookings(
+            bookingsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+          );
+        } catch (err) {
+          console.log(err);
         }
 
         setLoading(false);
@@ -58,72 +53,36 @@ export default function DashboardPage() {
     return () => unsub();
   }, [router]);
 
-  if (loading) {
-    return <p className="p-10 text-center">Loading dashboard...</p>;
-  }
-
-  // 📊 Stats
-  const totalUsers = users.length;
-  const totalBookings = bookings.length;
+  if (loading) return <p className="p-10 text-center">Loading...</p>;
 
   const revenue = bookings.reduce(
-    (sum, b: any) => sum + (Number(b.price) || 0),
+    (sum, b) => sum + (Number(b.price) || 0),
     0
   );
 
-  const proUsers = users.filter((u: any) => u.plan === "pro").length;
-
-  const avgBookingValue =
-    totalBookings > 0 ? revenue / totalBookings : 0;
-
   return (
     <div className="p-10 bg-gray-50 min-h-screen">
-
-      <h1 className="text-4xl font-bold text-center mb-10 text-blue-600">
-        📊 Mentora Admin Dashboard
+      <h1 className="text-4xl font-bold text-center text-blue-600 mb-10">
+        📊 Mentora Dashboard
       </h1>
 
-      {/* Stats */}
       <div className="grid md:grid-cols-4 gap-6">
-
-        <div className="bg-white shadow rounded-xl p-6 text-center">
-          <h2 className="text-gray-500">Users</h2>
-          <p className="text-3xl font-bold">{totalUsers}</p>
+        <div className="bg-white p-6 text-center shadow rounded-xl">
+          Users: {users.length}
         </div>
 
-        <div className="bg-white shadow rounded-xl p-6 text-center">
-          <h2 className="text-gray-500">Bookings</h2>
-          <p className="text-3xl font-bold">{totalBookings}</p>
+        <div className="bg-white p-6 text-center shadow rounded-xl">
+          Bookings: {bookings.length}
         </div>
 
-        <div className="bg-white shadow rounded-xl p-6 text-center">
-          <h2 className="text-gray-500">Revenue</h2>
-          <p className="text-3xl font-bold text-green-600">
-            {revenue} EGP
-          </p>
+        <div className="bg-white p-6 text-center shadow rounded-xl">
+          Revenue: {revenue} EGP
         </div>
 
-        <div className="bg-white shadow rounded-xl p-6 text-center">
-          <h2 className="text-gray-500">Pro Users</h2>
-          <p className="text-3xl font-bold text-purple-600">
-            {proUsers}
-          </p>
+        <div className="bg-white p-6 text-center shadow rounded-xl">
+          Pro Users: {users.filter((u) => u.plan === "pro").length}
         </div>
-
       </div>
-
-      {/* Extra metric */}
-      <div className="grid md:grid-cols-1 gap-6 mt-10">
-
-        <div className="bg-white shadow rounded-xl p-6 text-center">
-          <h2 className="text-gray-500">Avg Booking Value</h2>
-          <p className="text-3xl font-bold">
-            {avgBookingValue.toFixed(2)} EGP
-          </p>
-        </div>
-
-      </div>
-
     </div>
   );
 }
