@@ -6,7 +6,7 @@ import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { Resend } from "resend";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2024-06-20",
+  apiVersion: "2026-04-22.dahlia",
 });
 
 const resend = new Resend(process.env.RESEND_API_KEY as string);
@@ -28,18 +28,15 @@ export async function POST(req: Request) {
     );
   }
 
-  // 🎯 الدفع نجح
   if (event.type === "checkout.session.completed") {
     const session: any = event.data.object;
 
     const email = session.customer_email;
     const userId = session.client_reference_id;
-
     const tutorName = session.metadata?.tutorName;
     const subject = session.metadata?.subject;
     const price = session.amount_total / 100;
 
-    // 1️⃣ Save booking
     await addDoc(collection(db, "bookings"), {
       userId,
       userEmail: email,
@@ -49,26 +46,22 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
     });
 
-    // 2️⃣ Upgrade user plan (SaaS logic)
     if (userId) {
       await setDoc(
         doc(db, "users", userId),
-        {
-          plan: "pro",
-        },
+        { plan: "pro" },
         { merge: true }
       );
     }
 
-    // 3️⃣ Send email confirmation 📧
     await resend.emails.send({
       from: "Mentora <onboarding@resend.dev>",
       to: email,
       subject: "Payment Successful 🎉",
       html: `
         <div>
-          <h2>📖 Mentora Booking Confirmed</h2>
-          <p>Your session with <b>${tutorName}</b> is confirmed.</p>
+          <h2>Mentora Booking Confirmed</h2>
+          <p>Teacher: ${tutorName}</p>
           <p>Subject: ${subject}</p>
           <p>Price: ${price} EGP</p>
         </div>
