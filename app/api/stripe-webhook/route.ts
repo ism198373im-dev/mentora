@@ -5,9 +5,7 @@ import { db } from "@/lib/firebase";
 import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { Resend } from "resend";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2026-04-22.dahlia",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 const resend = new Resend(process.env.RESEND_API_KEY as string);
 
