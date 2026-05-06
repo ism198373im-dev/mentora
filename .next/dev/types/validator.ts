@@ -83,6 +83,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../../app/cancel/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/cancel">> = Specific
+  const handler = {} as typeof import("../../../app/cancel/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../../app/dashboard/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/dashboard">> = Specific
@@ -281,10 +290,37 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../../app/api/send-email/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/send-email">> = Specific
+  const handler = {} as typeof import("../../../app/api/send-email/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../app/api/stripe-webhook/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/stripe-webhook">> = Specific
+  const handler = {} as typeof import("../../../app/api/stripe-webhook/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../../app/api/webhook/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/webhook">> = Specific
   const handler = {} as typeof import("../../../app/api/webhook/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../app/create-subscription/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/create-subscription">> = Specific
+  const handler = {} as typeof import("../../../app/create-subscription/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

@@ -2,13 +2,13 @@
 
 import { useParams } from "next/navigation";
 import { tutors } from "@/data/tutors";
-import { auth, db } from "@/lib/firebase";
-import { addDoc, collection } from "firebase/firestore";
+import { useState } from "react";
 
 export default function BookPage() {
   const { id } = useParams();
-
   const tutor = tutors.find((t) => t.id === Number(id));
+
+  const [loading, setLoading] = useState(false);
 
   if (!tutor) {
     return (
@@ -18,29 +18,31 @@ export default function BookPage() {
     );
   }
 
-  const handleBooking = async () => {
-    const user = auth.currentUser;
-
-    if (!user) {
-      alert("You must login first ❌");
-      return;
-    }
+  const handlePay = async () => {
+    setLoading(true);
 
     try {
-      await addDoc(collection(db, "bookings"), {
-        tutorId: tutor.id,
-        name: tutor.name,
-        subject: tutor.subject,
-        price: tutor.price,
-        userId: user.uid,
-        userEmail: user.email,
+      const res = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ tutor }),
       });
 
-      alert("Booking saved to Firebase ✅");
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Payment error ❌");
+      }
     } catch (error) {
       console.log(error);
-      alert("Error saving booking ❌");
+      alert("Something went wrong ❌");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -65,10 +67,13 @@ export default function BookPage() {
         </p>
 
         <button
-          onClick={handleBooking}
-          className="bg-blue-600 text-white px-6 py-3 rounded w-full hover:bg-blue-700"
+          onClick={handlePay}
+          disabled={loading}
+          className={`w-full py-3 rounded text-white ${
+            loading ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
+          }`}
         >
-          Confirm Booking
+          {loading ? "Processing..." : "Pay & Confirm Booking 💳"}
         </button>
 
       </div>
