@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "next/navigation";
 import { collection, getDocs } from "firebase/firestore";
 
 export default function DashboardPage() {
@@ -9,50 +11,68 @@ export default function DashboardPage() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const router = useRouter();
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const usersSnap = await getDocs(collection(db, "users"));
-        const bookingsSnap = await getDocs(collection(db, "bookings"));
-
-        const usersData = usersSnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        const bookingsData = bookingsSnap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setUsers(usersData);
-        setBookings(bookingsData);
-      } catch (error) {
-        console.log("Error loading dashboard:", error);
+    const unsub = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        router.push("/login");
+        return;
       }
 
-      setLoading(false);
-    };
+      const ADMIN_EMAIL = "ism198373.is@gmail.com";
 
-    fetchData();
-  }, []);
+      if (currentUser.email !== ADMIN_EMAIL) {
+        alert("Access denied ❌");
+        router.push("/");
+        return;
+      }
+
+      const fetchData = async () => {
+        try {
+          const usersSnap = await getDocs(collection(db, "users"));
+          const bookingsSnap = await getDocs(collection(db, "bookings"));
+
+          const usersData = usersSnap.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          const bookingsData = bookingsSnap.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          setUsers(usersData);
+          setBookings(bookingsData);
+        } catch (error) {
+          console.log("Error loading dashboard:", error);
+        }
+
+        setLoading(false);
+      };
+
+      fetchData();
+    });
+
+    return () => unsub();
+  }, [router]);
 
   if (loading) {
     return <p className="p-10 text-center">Loading dashboard...</p>;
   }
 
-  // 📊 Basic stats
+  // 📊 Stats
   const totalUsers = users.length;
   const totalBookings = bookings.length;
 
   const revenue = bookings.reduce(
-    (sum, b) => sum + (Number(b.price) || 0),
+    (sum, b: any) => sum + (Number(b.price) || 0),
     0
   );
 
-  const proUsers = users.filter((u) => u.plan === "pro").length;
+  const proUsers = users.filter((u: any) => u.plan === "pro").length;
 
-  // 📊 Advanced SaaS metric (STEP 3)
   const avgBookingValue =
     totalBookings > 0 ? revenue / totalBookings : 0;
 
@@ -63,7 +83,7 @@ export default function DashboardPage() {
         📊 Mentora Admin Dashboard
       </h1>
 
-      {/* Main Stats */}
+      {/* Stats */}
       <div className="grid md:grid-cols-4 gap-6">
 
         <div className="bg-white shadow rounded-xl p-6 text-center">
@@ -92,8 +112,8 @@ export default function DashboardPage() {
 
       </div>
 
-      {/* Advanced SaaS Metrics */}
-      <div className="grid md:grid-cols-2 gap-6 mt-10">
+      {/* Extra metric */}
+      <div className="grid md:grid-cols-1 gap-6 mt-10">
 
         <div className="bg-white shadow rounded-xl p-6 text-center">
           <h2 className="text-gray-500">Avg Booking Value</h2>
