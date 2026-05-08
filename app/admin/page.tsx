@@ -1,54 +1,99 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { auth, db } from "@/lib/firebase";
-import { collection, getDocs, doc, updateDoc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 
-export default function Admin() {
-  const [bookings, setBookings] = useState<any[]>([]);
-  const [allowed, setAllowed] = useState(false);
+export default function AdminPage() {
+  const [teachers, setTeachers] = useState<any[]>([]);
+  const [name, setName] = useState("");
+  const [subject, setSubject] = useState("");
+  const [price, setPrice] = useState(0);
+
+  const fetchTeachers = async () => {
+    const snap = await getDocs(collection(db, "teachers"));
+    setTeachers(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  };
 
   useEffect(() => {
-    const run = async () => {
-      const u = auth.currentUser;
-      if (!u) return;
-
-      const snap = await getDoc(doc(db, "users", u.uid));
-      if (snap.exists() && snap.data().role === "admin") {
-        setAllowed(true);
-      }
-
-      const b = await getDocs(collection(db, "bookings"));
-      setBookings(b.docs.map(d => ({ id: d.id, ...d.data() })));
-    };
-
-    run();
+    fetchTeachers();
   }, []);
 
-  if (!allowed) return <p>🚫 Not allowed</p>;
+  const addTeacher = async () => {
+    await addDoc(collection(db, "teachers"), {
+      name,
+      subject,
+      price,
+      timeSlots: ["10:00", "12:00", "14:00"],
+    });
+
+    setName("");
+    setSubject("");
+    setPrice(0);
+    fetchTeachers();
+  };
+
+  const removeTeacher = async (id: string) => {
+    await deleteDoc(doc(db, "teachers", id));
+    fetchTeachers();
+  };
 
   return (
-    <div className="p-6">
-      {bookings.map(b => (
-        <div key={b.id} className="border p-3 my-2">
-          <p>{b.email}</p>
+    <div className="p-10">
+
+      <h1 className="text-3xl font-bold mb-6">Admin Panel</h1>
+
+      {/* Add Teacher */}
+      <div className="bg-white p-4 shadow rounded mb-6">
+
+        <input
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="border p-2 m-1"
+        />
+
+        <input
+          placeholder="Subject"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          className="border p-2 m-1"
+        />
+
+        <input
+          placeholder="Price"
+          type="number"
+          value={price}
+          onChange={(e) => setPrice(Number(e.target.value))}
+          className="border p-2 m-1"
+        />
+
+        <button
+          onClick={addTeacher}
+          className="bg-green-600 text-white px-4 py-2 rounded"
+        >
+          Add Teacher
+        </button>
+      </div>
+
+      {/* List */}
+      {teachers.map((t) => (
+        <div key={t.id} className="p-3 bg-gray-100 mb-2 flex justify-between">
+          <div>
+            {t.name} - {t.subject} - {t.price} EGP
+          </div>
 
           <button
-            onClick={() =>
-              updateDoc(doc(db, "bookings", b.id), { status: "approved" })
-            }
-            className="bg-green-500 text-white px-2 mr-2"
+            onClick={() => removeTeacher(t.id)}
+            className="text-red-600"
           >
-            Approve
-          </button>
-
-          <button
-            onClick={() =>
-              updateDoc(doc(db, "bookings", b.id), { status: "rejected" })
-            }
-            className="bg-red-500 text-white px-2"
-          >
-            Reject
+            Delete
           </button>
         </div>
       ))}

@@ -1,121 +1,83 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { auth, db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
-import AuthGuard from "@/components/AuthGuard";
 
 export default function BookingsPage() {
   const [bookings, setBookings] = useState<any[]>([]);
-  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-
-      if (currentUser) {
-        const snapshot = await getDocs(collection(db, "bookings"));
-
-        const data = snapshot.docs.map((docItem) => ({
-          id: docItem.id,
-          ...docItem.data(),
-        }));
-
-        const filtered = data.filter(
-          (b: any) => b.userId === currentUser.uid
-        );
-
-        setBookings(filtered);
-      } else {
+    const unsub = onAuthStateChanged(auth, async (u) => {
+      if (!u) {
+        setUser(null);
         setBookings([]);
+        setLoading(false);
+        return;
       }
 
+      setUser(u);
+
+      const snap = await getDocs(collection(db, "bookings"));
+
+      const data = snap.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((b: any) => b.userId === u.uid);
+
+      setBookings(data);
       setLoading(false);
     });
 
     return () => unsub();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    const confirmDelete = confirm("Delete this booking?");
-    if (!confirmDelete) return;
-
-    try {
-      await deleteDoc(doc(db, "bookings", id));
-
-      setBookings((prev) => prev.filter((b) => b.id !== id));
-
-      alert("Deleted successfully ✅");
-    } catch (error) {
-      console.log(error);
-      alert("Error deleting ❌");
-    }
-  };
-
   if (loading) {
-    return <p className="p-10 text-center">Loading...</p>;
+    return <div className="p-10 text-center">Loading...</div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="p-10 text-center">
+        <h1 className="text-xl font-bold">You must login first 🔐</h1>
+      </div>
+    );
   }
 
   return (
-    <AuthGuard>
+    <div className="p-10">
 
-      <div className="p-10">
+      <h1 className="text-3xl font-bold mb-6">
+        My Bookings 📚
+      </h1>
 
-        <h1 className="text-4xl font-bold text-blue-600 mb-8 text-center">
-          📋 My Bookings
-        </h1>
+      {bookings.length === 0 ? (
+        <p>No bookings yet</p>
+      ) : (
+        <div className="grid md:grid-cols-3 gap-6">
 
-        {!user ? (
-          <p className="text-center text-gray-500">
-            Please login first
-          </p>
-        ) : bookings.length === 0 ? (
-          <p className="text-center text-gray-500">
-            No bookings yet
-          </p>
-        ) : (
-          <div className="grid md:grid-cols-3 gap-6">
+          {bookings.map((b) => (
+            <div key={b.id} className="p-4 shadow rounded-xl bg-white">
 
-            {bookings.map((b) => (
-              <div
-                key={b.id}
-                className="bg-white p-6 shadow rounded-xl text-center"
-              >
+              <h2 className="font-bold text-xl">
+                {b.tutorName}
+              </h2>
 
-                <h2 className="text-xl font-bold mb-2">
-                  {b.name}
-                </h2>
+              <p>{b.subject}</p>
+              <p>{b.price} EGP</p>
 
-                <p className="text-gray-500 mb-1">
-                  Subject: {b.subject}
-                </p>
+              <p className="text-sm text-gray-500 mt-2">
+                {b.userEmail}
+              </p>
 
-                <p className="text-gray-500 mb-4">
-                  {b.price} EGP / hour
-                </p>
+            </div>
+          ))}
 
-                <button
-                  onClick={() => handleDelete(b.id)}
-                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                >
-                  Delete
-                </button>
+        </div>
+      )}
 
-              </div>
-            ))}
-
-          </div>
-        )}
-
-      </div>
-
-    </AuthGuard>
+    </div>
   );
 }

@@ -1,9 +1,10 @@
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { AuthProvider } from "@/lib/AuthProvider";
 
 export const metadata = {
-  title: "Mentora",
-  description: "Learning + Quran + Tutors Platform",
+  title: "Mintara",
+  description: "Modern Learning Platform",
 };
 
 export default function RootLayout({
@@ -12,14 +13,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="ar">
 
-        <Navbar />
+      <body className="bg-white text-gray-900">
 
-        {children}
+        <AuthProvider>
+
+          <Navbar />
+
+          {children}
+
+        </AuthProvider>
 
       </body>
+
     </html>
   );
 }

@@ -1,44 +1,35 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: Request) {
-  try {
-    const { user } = await req.json();
+  const { tutor, bookingId } = await req.json();
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "Missing user" },
-        { status: 400 }
-      );
-    }
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    mode: "payment",
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-
-      payment_method_types: ["card"],
-
-      customer_email: user.email,
-
-      client_reference_id: user.uid,
-
-      line_items: [
-        {
-          price: process.env.STRIPE_PRICE_ID as string,
-          quantity: 1,
+    line_items: [
+      {
+        price_data: {
+          currency: "egp",
+          product_data: {
+            name: tutor.name,
+          },
+          unit_amount: tutor.price * 100,
         },
-      ],
+        quantity: 1,
+      },
+    ],
 
-      success_url: `${process.env.NEXT_PUBLIC_URL}/success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/cancel`,
-    });
+    success_url: `${process.env.NEXT_PUBLIC_URL}/dashboard`,
+    cancel_url: `${process.env.NEXT_PUBLIC_URL}/book/${tutor.id}`,
 
-    return NextResponse.json({ url: session.url });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Server error" },
-      { status: 500 }
-    );
-  }
+    metadata: {
+      bookingId,
+    },
+  });
+
+  return NextResponse.json({ url: session.url });
 }
