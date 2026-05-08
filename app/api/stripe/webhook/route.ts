@@ -1,6 +1,9 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase-admin"; // مهم (admin SDK)
+import { db } from "@/lib/firebase-admin";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -17,10 +20,9 @@ export async function POST(req: Request) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err) {
-    return NextResponse.json({ error: "Webhook Error" }, { status: 400 });
+    return NextResponse.json({ error: "Webhook error" }, { status: 400 });
   }
 
-  // 🎯 عند نجاح الدفع
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as any;
 
@@ -29,6 +31,7 @@ export async function POST(req: Request) {
     if (bookingId) {
       await db.collection("bookings").doc(bookingId).update({
         status: "paid",
+        paidAt: new Date(),
       });
     }
   }
